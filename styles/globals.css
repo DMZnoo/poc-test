@@ -1,0 +1,56 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+.label-box {
+  position:relative;
+  width:200px;
+  height:200px;
+}
+.label-box::before, .label-box::after, .label-box-content::before, .label-box-content::after {
+  position: absolute;
+  width: 80px; 
+  height: 80px;
+  border-color: blueviolet;
+  border-style: solid;
+  content: ' ';
+}
+
+.label-box::before {
+  top: 0;
+  left: 0;
+  border-width: 5px 0 0 5px;
+}
+.label-box::after {
+  top: 0;
+  right: 0;
+  border-width: 5px 5px 0 0;
+}
+.label-box-content {
+  position:relative;
+  width:200px;
+  height:200px;
+}
+.label-box-content::before {
+  bottom:0;
+  right:0;
+  border-width: 0 5px 5px 0;
+}
+
+.label-box-content::after {
+  bottom:0;
+  left:0;
+  border-width: 0 0 5px 5px;
+}
