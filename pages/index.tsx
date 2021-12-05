@@ -10,7 +10,6 @@ import DropZone from "components/DropZone";
 import { AppContext, AppContextProps } from "hooks/useApp";
 import Loading from "components/Loading";
 import BatchNodes3D from "components/GraphicsComponents/3D/BatchNodes3D";
-import app from "next/app";
 
 const Home: NextPage = () => {
   const context = useCanvas();
@@ -18,14 +17,10 @@ const Home: NextPage = () => {
     loading,
     setLoading,
     dim,
-    layer,
-    setLayer,
     setDim,
-    graphData,
     setGraphData,
     setCanvasTheme,
     groups,
-    setGroups,
     setSelectedGroupId,
     setEnableScroll,
     setShowEdges,
@@ -53,9 +48,11 @@ const Home: NextPage = () => {
               setGraphData(value.data);
               setEnableScroll(value.enableScroll);
               setShowEdges(value.showEdges);
+
               if (value.selectedGroupId) {
                 setSelectedGroupId(value.selectedGroupId);
               }
+
               return (
                 <Canvas>
                   <CanvasContext.Provider value={context}>
@@ -88,7 +85,7 @@ const Home: NextPage = () => {
           </AppContext.Consumer>
         </div>
       )}
-      <Widget setLayer={setLayer} layer={layer} setDim={setDim} dim={dim} />
+      <Widget setDim={setDim} dim={dim} />
       <div className="absolute mt-20 w-60">
         <DropZone setGraphData={setGraphData} setDim={setDim} />
       </div>

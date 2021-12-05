@@ -1,17 +1,15 @@
-import { Listbox, Switch, Transition } from "@headlessui/react";
+import { Switch } from "@headlessui/react";
 import DropDownMenu from "components/DropDownMenu";
 import { AppContext, AppContextProps } from "hooks/useApp";
 import useSessionStorage from "hooks/useSessionStorage";
 import * as React from "react";
 
 interface IWidget {
-  setLayer: (val: number) => void;
-  layer: number;
   dim: 3 | 2;
   setDim: (val: 3 | 2) => void;
 }
 
-const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
+const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
   const [linkSize, setLinkSize] = React.useState<number>(0);
 
   const {
@@ -23,11 +21,12 @@ const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
     selectedGroupId,
     setCurrentFileName,
     setData,
-    fileNames,
     currentFileName,
     setShowEdges,
     showEdges,
+    setLoading,
   } = React.useContext<AppContextProps>(AppContext);
+  const [fileNames, setFileNames] = React.useState<string[]>([]);
 
   const [cachedData, setCachedData] = useSessionStorage<Record<string, any>>(
     "cachedData",
@@ -41,6 +40,13 @@ const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
       setLinkSize(size);
     }
   }, [data]);
+
+  React.useEffect(() => {
+    Object.entries(cachedData).forEach((dat) => {
+      setFileNames((fileNames) => [...fileNames, dat[0]]);
+    });
+  }, []);
+
   return (
     <div
       className={`absolute w-full h-full ${
@@ -54,10 +60,11 @@ const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
               data={fileNames}
               selected={currentFileName}
               setSelected={(e) => {
+                setLoading(true);
                 console.log(e);
                 console.log(cachedData);
                 if (cachedData[e]) {
-                  if (cachedData[e].includes("2d")) {
+                  if (e.includes("2d")) {
                     setDim(2);
                   } else {
                     setDim(3);
@@ -68,6 +75,7 @@ const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
                   alert("Sorry that data has been lost..");
                 }
                 setCurrentFileName(e);
+                setLoading(false);
               }}
             />
           )}
@@ -79,12 +87,19 @@ const Widget: React.FC<IWidget> = ({ setLayer, layer, dim, setDim }) => {
               <Switch
                 checked={dim === 3}
                 onChange={() => {
-                  if (dim === 3) {
-                    setDim(2);
-                  } else {
-                    setDim(3);
-                  }
-                  setData({ nodes: [], links: [] });
+                  setLoading(true);
+                  Object.entries(cachedData).forEach((data) => {
+                    if (dim === 3 && data[0].includes("2d")) {
+                      setDim(2);
+                      const loaded = JSON.parse(cachedData[e]);
+                      setData(loaded);
+                    } else {
+                      setDim(3);
+                      const loaded = JSON.parse(cachedData[e]);
+                      setData(loaded);
+                    }
+                  });
+                  setLoading(false);
                 }}
                 className={`${dim === 3 ? "bg-teal-700" : "bg-red-700"}
           relative inline-flex flex-shrink-0 h-[38px] w-[74px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}

@@ -12,14 +12,8 @@ interface Event<T = EventTarget> {
   target: T;
 }
 const DropZone: React.FC<IDropZone> = ({ setGraphData, setDim }) => {
-  const {
-    setLoading,
-    appTheme,
-    setData,
-    setFileNames,
-    fileNames,
-    setCurrentFileName,
-  } = React.useContext<AppContextProps>(AppContext);
+  const { setLoading, appTheme, setData, setCurrentFileName } =
+    React.useContext<AppContextProps>(AppContext);
 
   const [cachedData, setCachedData] = useSessionStorage<Record<string, any>>(
     "cachedData",
@@ -39,19 +33,8 @@ const DropZone: React.FC<IDropZone> = ({ setGraphData, setDim }) => {
         // Closure to capture the file information.
         reader.onload = (function (theFile: File) {
           return function (e: any) {
-            console.log("theFile.name = ", theFile);
             try {
               const json = JSON.parse(e.target.result);
-              console.log("json: ", json);
-              console.log("fileNames: ", fileNames);
-              if (fileNames.length > 0) {
-                const currentFileNames = fileNames;
-                currentFileNames.push(theFile.name);
-                setFileNames(currentFileNames);
-                console.log("current file names: ", currentFileNames);
-              } else {
-                setFileNames([theFile.name]);
-              }
               setCurrentFileName(theFile.name);
 
               if (theFile.name.includes("2d")) {
@@ -59,7 +42,10 @@ const DropZone: React.FC<IDropZone> = ({ setGraphData, setDim }) => {
               } else {
                 setDim(3);
               }
-              setCachedData({ [theFile.name]: JSON.stringify(json) });
+              setCachedData((cachedData: any) => ({
+                ...cachedData,
+                [theFile.name]: JSON.stringify(json),
+              }));
               setData(json);
               setGraphData(json);
             } catch (ex) {

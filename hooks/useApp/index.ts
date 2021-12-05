@@ -14,8 +14,6 @@ export type AppContextProps = {
   setSelectedGroupId: (val: string) => void;
   enableScroll: boolean;
   setEnableScroll: (val: boolean) => void;
-  fileNames: string[];
-  setFileNames: (val: string[]) => void;
   currentFileName: string | undefined;
   setCurrentFileName: (val: string) => void;
   showEdges: boolean;
@@ -32,7 +30,6 @@ const useApp = () => {
     string | undefined
   >();
   const [enableScroll, setEnableScroll] = React.useState<boolean>(true);
-  const [fileNames, setFileNames] = React.useState<string[]>([]);
   const [currentFileName, setCurrentFileName] = React.useState<
     string | undefined
   >();
@@ -50,8 +47,6 @@ const useApp = () => {
     setSelectedGroupId,
     enableScroll,
     setEnableScroll,
-    fileNames,
-    setFileNames,
     currentFileName,
     setCurrentFileName,
     showEdges,

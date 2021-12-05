@@ -10,14 +10,11 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridColumn, AgGridReact } from "ag-grid-react";
 import { GraphLink, LinkType, Node } from "global.d.types";
 import { InfoBox } from "./styles";
+import Loading from "components/Loading";
 
 const BatchNodes3D = () => {
   const [edges, setEdges] = React.useState<any>();
   const [selectedNodeId, setSelectedNodeId] = React.useState<number>(-1);
-  const mouse = new THREE.Vector2(1, 1);
-  const [showEdges, setShowEdges] = React.useState<boolean>(true);
-  const [showGroupInfo, setShowGroupInfo] = React.useState<string>();
-  const [moving, setMoving] = React.useState<boolean>(false);
 
   const {
     graphData,
@@ -25,11 +22,11 @@ const BatchNodes3D = () => {
     loading,
     layer,
     selectedGroupId,
-    setSelectedGroupId,
     enableScroll,
     canvasTheme,
     groups,
     setGroups,
+    showEdges,
   } = React.useContext<CanvasContextProps>(CanvasContext);
   const [drawSize, setDrawSize] = React.useState<number>(10000);
 
@@ -38,6 +35,7 @@ const BatchNodes3D = () => {
     scene,
     gl: { domElement },
   } = useThree();
+
   React.useEffect(() => {
     if (canvasTheme === "dark") {
       scene.background = new THREE.Color(0x000000);
@@ -45,10 +43,12 @@ const BatchNodes3D = () => {
       scene.background = new THREE.Color(0xffffff);
     }
   }, [canvasTheme]);
+
   const setGroupPostion = React.useCallback(() => {
     setLoading(true);
     let tempGroups: any = {};
     let tempSet: any = {};
+
     graphData["nodes"].forEach((n: Node, i: number) => {
       const groupId = n.group.id;
       if (groupId) {
@@ -59,6 +59,7 @@ const BatchNodes3D = () => {
         }
       }
     });
+
     graphData["nodes"].forEach((n: Node, i: number) => {
       const groupId = n.group.id;
       if (groupId) {
@@ -70,6 +71,7 @@ const BatchNodes3D = () => {
         };
       }
     });
+
     setGroups(tempGroups);
     setLoading(false);
   }, [graphData, setLoading]);
@@ -77,6 +79,7 @@ const BatchNodes3D = () => {
   const setNodePositionAndEdges = React.useCallback(() => {
     setLoading(true);
     const edgesArr: any = [];
+
     graphData["links"][0].forEach((link: LinkType, i: number) => {
       const sourceNode = graphData["nodes"].find(
         (n: Node) => n.id === link["source"]
@@ -103,6 +106,7 @@ const BatchNodes3D = () => {
         });
       }
     });
+
     setEdges(edgesArr);
     setDrawSize(graphData["nodes"].length);
     setLoading(false);
@@ -111,53 +115,22 @@ const BatchNodes3D = () => {
   React.useEffect(() => {
     if (graphData) {
       if (graphData.nodes.length > 0 || graphData.links.length > 0) {
-        document.addEventListener("wheel", onDocumentMouseWheel);
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("keypress", onKeyPress);
         setGroupPostion();
         setNodePositionAndEdges();
-        console.log("graphData: ", graphData);
-        setShowEdges(true);
+        console.log("3d graphData: ", graphData);
       }
     }
   }, [graphData]);
 
-  function onKeyPress(event: KeyboardEvent) {
-    if (
-      event.key === "w" ||
-      event.key === "a" ||
-      event.key === "s" ||
-      event.key === "d"
-    ) {
-      setMoving(true);
-    } else {
-      setMoving(false);
-    }
-  }
-
-  function onMouseMove(event: MouseEvent) {
-    event.preventDefault();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  }
+  React.useEffect(() => {
+    document.addEventListener("wheel", onDocumentMouseWheel);
+  }, []);
 
   function onDocumentMouseWheel(event: WheelEvent) {
     if (enableScroll) {
-      camera.position.z += event.deltaY / 5;
+      camera.position.z += event.deltaY / 10;
     }
   }
-
-  // useFrame(() => {
-  //   if (
-  //     Math.abs(camera.position.x) > 20 ||
-  //     Math.abs(camera.position.y) > 20 ||
-  //     Math.abs(camera.position.z) > 20
-  //   ) {
-  //     setLayer("layer-1");
-  //   } else {
-  //     setLayer("layer-2");
-  //   }
-  // });
 
   if (loading || !graphData) {
     return <></>;
@@ -165,10 +138,7 @@ const BatchNodes3D = () => {
 
   return (
     <>
-      <Instances
-        limit={graphData["nodes"].length}
-        range={graphData["nodes"].length}
-      >
+      <Instances limit={2000} range={2000}>
         <sphereGeometry attach="geometry" args={[0.1, 100, 100]} />
         <meshPhongMaterial opacity={1} transparent={true} />
         <>
@@ -239,7 +209,7 @@ const BatchNodes3D = () => {
                 key={"edge-" + i}
                 coords={edge.source.position}
                 nextCoords={edge.target.position}
-                visibility={true}
+                visibility={showEdges}
               />
             );
           })}
