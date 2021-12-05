@@ -86,19 +86,23 @@ const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
               <Switch.Label className={`mr-4`}>Dimension: {dim}</Switch.Label>
               <Switch
                 checked={dim === 3}
-                onChange={() => {
+                onChange={(e) => {
                   setLoading(true);
-                  Object.entries(cachedData).forEach((data) => {
-                    if (dim === 3 && data[0].includes("2d")) {
-                      setDim(2);
-                      const loaded = JSON.parse(cachedData[e]);
-                      setData(loaded);
-                    } else {
-                      setDim(3);
-                      const loaded = JSON.parse(cachedData[e]);
-                      setData(loaded);
-                    }
-                  });
+                  if (currentFileName) {
+                    Object.entries(cachedData).forEach((data) => {
+                      if (dim === 3 && data[0].includes("2d")) {
+                        setDim(2);
+                        const loaded = JSON.parse(cachedData[currentFileName]);
+                        setData(loaded);
+                      } else {
+                        setDim(3);
+                        const loaded = JSON.parse(cachedData[currentFileName]);
+                        setData(loaded);
+                      }
+                    });
+                  } else {
+                    alert("Missing files");
+                  }
                   setLoading(false);
                 }}
                 className={`${dim === 3 ? "bg-teal-700" : "bg-red-700"}

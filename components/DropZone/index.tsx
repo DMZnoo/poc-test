@@ -2,7 +2,6 @@ import { read } from "fs";
 import { AppContext, AppContextProps } from "hooks/useApp";
 import useSessionStorage from "hooks/useSessionStorage";
 import * as React from "react";
-import Dropzone from "react-dropzone";
 
 interface IDropZone {
   setGraphData: (val: any) => void;
