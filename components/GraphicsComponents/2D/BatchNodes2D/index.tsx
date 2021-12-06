@@ -31,14 +31,14 @@ const BatchNodes2D = () => {
 
   function onDocumentMouseWheel(event: WheelEvent) {
     if (enableScroll) {
-      console.log("enabled");
-      camera.position.z += event.deltaY / 5;
+      console.log("2d enabled");
+      camera.position.z += event.deltaY / 100;
     }
   }
 
   React.useEffect(() => {
     document.addEventListener("wheel", onDocumentMouseWheel, false);
-  });
+  }, []);
 
   React.useEffect(() => {
     if (canvasTheme === "dark") {
@@ -129,6 +129,7 @@ const BatchNodes2D = () => {
   React.useEffect(() => {
     if (graphData) {
       if (graphData.nodes.length > 0 || graphData.links.length > 0) {
+        document.addEventListener("wheel", onDocumentMouseWheel, false);
         buildNodesAndGroups();
         buildLinks();
         console.log("2d graphData: ", graphData);

@@ -123,7 +123,7 @@ const BatchNodes3D = () => {
   }, [graphData]);
 
   React.useEffect(() => {
-    document.addEventListener("wheel", onDocumentMouseWheel);
+    document.addEventListener("wheel", onDocumentMouseWheel, false);
   }, []);
 
   function onDocumentMouseWheel(event: WheelEvent) {
