@@ -10,10 +10,8 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridColumn, AgGridReact } from "ag-grid-react";
 import { GraphLink, LinkType, Node } from "global.d.types";
 import { InfoBox } from "./styles";
-import Loading from "components/Loading";
 
 const BatchNodes3D = () => {
-  const [edges, setEdges] = React.useState<any>();
   const [selectedNodeId, setSelectedNodeId] = React.useState<number>(-1);
 
   const {
@@ -24,11 +22,11 @@ const BatchNodes3D = () => {
     selectedGroupId,
     enableScroll,
     canvasTheme,
-    groups,
     setGroups,
-    showEdges,
+    showLinks,
+    links,
+    setLinks,
   } = React.useContext<CanvasContextProps>(CanvasContext);
-  const [drawSize, setDrawSize] = React.useState<number>(10000);
 
   const {
     camera,
@@ -44,78 +42,42 @@ const BatchNodes3D = () => {
     }
   }, [canvasTheme]);
 
-  const setGroupPostion = React.useCallback(() => {
-    setLoading(true);
-    let tempGroups: any = {};
-    let tempSet: any = {};
-
-    graphData["nodes"].forEach((n: Node, i: number) => {
-      const groupId = n.group.id;
-      if (groupId) {
-        if (Object.keys(tempSet).includes(groupId)) {
-          tempSet[groupId] += 1;
-        } else {
-          tempSet[groupId] = 1;
-        }
-      }
-    });
-
-    graphData["nodes"].forEach((n: Node, i: number) => {
-      const groupId = n.group.id;
-      if (groupId) {
-        const pos = n.group.positions;
-        tempGroups[groupId] = {
-          pos: pos,
-          color: Math.random() * 0xffffff,
-          nodeCount: tempSet[groupId],
-        };
-      }
-    });
-
-    setGroups(tempGroups);
-    setLoading(false);
-  }, [graphData, setLoading]);
-
   const setNodePositionAndEdges = React.useCallback(() => {
     setLoading(true);
     const edgesArr: any = [];
-
-    graphData["links"][0].forEach((link: LinkType, i: number) => {
+    graphData["links"].forEach((link: LinkType, i: number) => {
+      console.log("link: ", link);
       const sourceNode = graphData["nodes"].find(
         (n: Node) => n.id === link["source"]
       );
       const targetNode = graphData["nodes"].find(
         (n: Node) => n.id === link["target"]
       );
+      console.log("sourceNode: ", sourceNode);
       if (sourceNode && targetNode) {
         edgesArr.push({
           source: {
             id: sourceNode.id,
             position: sourceNode.position,
-            group: {
-              id: sourceNode.group.id,
-            },
+            group: sourceNode.group.id,
           },
           target: {
             id: targetNode.id,
             position: targetNode.position,
-            group: {
-              id: targetNode.group.id,
-            },
+            group: targetNode.group.id,
           },
         });
       }
     });
-
-    setEdges(edgesArr);
-    setDrawSize(graphData["nodes"].length);
+    console.log("link rec: ", edgesArr);
+    setLinks(edgesArr);
     setLoading(false);
   }, [layer, graphData, setLoading]);
 
   React.useEffect(() => {
     if (graphData) {
       if (graphData.nodes.length > 0 || graphData.links.length > 0) {
-        setGroupPostion();
+        setGroups(Object.keys(graphData["groups"]));
         setNodePositionAndEdges();
         console.log("3d graphData: ", graphData);
       }
@@ -150,11 +112,7 @@ const BatchNodes3D = () => {
               return (
                 <Instance
                   key={node.id}
-                  color={
-                    node.group.id && groups[node.group.id]
-                      ? new Color().setHex(groups[node.group.id].color)
-                      : new Color()
-                  }
+                  color={new Color(node.color)}
                   position={new Vector3().fromArray(node.position)}
                   scale={2}
                   onClick={(e: ThreeEvent<MouseEvent>) => {
@@ -195,12 +153,12 @@ const BatchNodes3D = () => {
             })}
         </>
       </Instances>
-      {edges &&
-        edges
+      {links &&
+        links
           .filter((edge: GraphLink) =>
             selectedGroupId
-              ? edge.source.group.id === selectedGroupId ||
-                edge.target.group.id === selectedGroupId
+              ? edge.source.group === selectedGroupId ||
+                edge.target.group === selectedGroupId
               : edge
           )
           .map((edge: GraphLink, i: number) => {
@@ -209,7 +167,7 @@ const BatchNodes3D = () => {
                 key={"edge-" + i}
                 coords={edge.source.position}
                 nextCoords={edge.target.position}
-                visibility={showEdges}
+                visibility={showLinks}
               />
             );
           })}

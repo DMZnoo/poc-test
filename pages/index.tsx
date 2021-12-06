@@ -17,13 +17,16 @@ const Home: NextPage = () => {
     loading,
     setLoading,
     dim,
+    layer,
+    setLayer,
     setDim,
     setGraphData,
     setCanvasTheme,
     groups,
     setSelectedGroupId,
     setEnableScroll,
-    setShowEdges,
+    setShowLinks,
+    links,
   } = context;
   const appContext = React.useContext<AppContextProps>(AppContext);
 
@@ -47,7 +50,8 @@ const Home: NextPage = () => {
               value.setDataGroups(groups);
               setGraphData(value.data);
               setEnableScroll(value.enableScroll);
-              setShowEdges(value.showEdges);
+              setShowLinks(value.showLinks);
+              value.setLinks(links);
 
               if (value.selectedGroupId) {
                 setSelectedGroupId(value.selectedGroupId);

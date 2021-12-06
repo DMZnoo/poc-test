@@ -1,7 +1,7 @@
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import * as React from "react";
-import { GraphLink, LinkType, Node } from "../../../../global.d.types";
+import { GraphLink, LinkType, Node } from "global.d.types";
 import { Vector3 } from "three";
 import { Circle, Html } from "@react-three/drei";
 import { InfoBox } from "components/GraphicsComponents/3D/BatchNodes3D/styles";
@@ -12,21 +12,13 @@ import Link from "components/GraphicsComponents/Link";
 
 const BatchNodes2D = () => {
   const { graphData } = React.useContext<CanvasContextProps>(CanvasContext);
-  const [records, setRecords] = React.useState<Record<string, any>>();
   const [links, setLinks] = React.useState<Record<string, any>>();
   const [nodeInfo, setNodeInfo] = React.useState<Record<string, boolean>>({});
   const [defaultNodeInfo, setDefaultNodeInfo] = React.useState<
     Record<string, boolean>
   >({});
-  const [groupInfo, setGroupInfo] = React.useState<Record<string, boolean>>({});
-  const {
-    canvasTheme,
-    setGroups,
-    selectedGroupId,
-    enableScroll,
-    showEdges,
-    setLoading,
-  } = React.useContext<CanvasContextProps>(CanvasContext);
+  const { canvasTheme, selectedGroupId, enableScroll, showLinks, setLoading } =
+    React.useContext<CanvasContextProps>(CanvasContext);
   const { scene, camera } = useThree();
 
   function onDocumentMouseWheel(event: WheelEvent) {
@@ -48,54 +40,10 @@ const BatchNodes2D = () => {
     }
   }, [canvasTheme]);
 
-  const buildNodesAndGroups = () => {
-    setLoading(true);
-    const rec: any = {};
-    const groupInfos: any = {};
-    graphData["nodes"].forEach((node: Node) => {
-      const name = node.group.name ? node.group.name : node.group.id;
-      if (name) {
-        if (!Object.keys(groupInfos).includes(name)) {
-          const randomColor = Math.random() * 0xffffff;
-          groupInfos[name] = {
-            positions: node.group.positions,
-            color: randomColor,
-          };
-          rec[node.id] = {
-            position: [node.position[0], node.position[1], 0],
-            color: randomColor,
-            group: node.group,
-          };
-          setNodeInfo((nodeInfo) => ({
-            ...nodeInfo,
-            [node.id]: false,
-          }));
-        } else {
-          const groupInfo = groupInfos[name];
-          rec[node.id] = {
-            position: [node.position[0], node.position[1], 0],
-            color: groupInfo.color,
-            group: node.group,
-          };
-          setGroupInfo((groupInfo) => ({
-            ...groupInfo,
-            [name]: false,
-          }));
-        }
-      } else {
-        alert("The group name or id is missing in the dataset!");
-      }
-    });
-    setDefaultNodeInfo(nodeInfo);
-    setGroups(groupInfos);
-    setRecords(rec);
-    setLoading(false);
-  };
-
   const buildLinks = () => {
     setLoading(true);
     const linkRec: any = [];
-    graphData["links"][0].forEach((link: LinkType) => {
+    graphData["links"].forEach((link: LinkType) => {
       const sourceNode = graphData["nodes"].find(
         (n: Node) => n.id === link["source"]
       );
@@ -107,16 +55,12 @@ const BatchNodes2D = () => {
           source: {
             id: sourceNode.id,
             position: sourceNode.position,
-            group: {
-              id: sourceNode.group.id || sourceNode.group.name,
-            },
+            group: sourceNode.group,
           },
           target: {
             id: targetNode.id,
             position: targetNode.position,
-            group: {
-              id: targetNode.group.id || targetNode.group.name,
-            },
+            group: targetNode.group,
           },
           color: Math.random() * 0x9c88ff,
         });
@@ -130,7 +74,6 @@ const BatchNodes2D = () => {
     if (graphData) {
       if (graphData.nodes.length > 0 || graphData.links.length > 0) {
         document.addEventListener("wheel", onDocumentMouseWheel, false);
-        buildNodesAndGroups();
         buildLinks();
         console.log("2d graphData: ", graphData);
       }
@@ -139,49 +82,46 @@ const BatchNodes2D = () => {
 
   return (
     <>
-      {records && (
+      {graphData && (
         <>
-          {Object.entries(records)
-            .filter((p) =>
-              selectedGroupId
-                ? selectedGroupId === p[1].group.name ||
-                  selectedGroupId === p[1].group.id
-                : p
+          {graphData["nodes"]
+            .filter((node: Node) =>
+              selectedGroupId ? selectedGroupId === node.group : node
             )
-            .map((p, i) => {
+            .map((node: Node) => {
               return (
                 <>
                   <Circle
-                    key={p[0]}
+                    key={node.id}
                     args={[0.1, 100]}
-                    position={new Vector3().fromArray(p[1].position)}
+                    position={new Vector3().fromArray(node.position)}
                     onPointerOver={(e) => {
                       setNodeInfo(defaultNodeInfo);
                       setNodeInfo((nodeInfo) => ({
                         ...nodeInfo,
-                        [p[0]]: !nodeInfo[p[0]],
+                        [node.id]: !nodeInfo[node.id],
                       }));
                     }}
                   >
                     <meshBasicMaterial
                       attach="material"
-                      color={p[1].color}
+                      color={graphData["groups"][node.group].color}
                       opacity={1}
                       transparent={true}
                     />
                   </Circle>
-                  {nodeInfo[p[0]] && (
+                  {nodeInfo[node.id] && (
                     <>
                       <Html
                         distanceFactor={5}
-                        position={new Vector3().fromArray(p[1].position)}
+                        position={new Vector3().fromArray(node.position)}
                       >
                         <div
                           className={
                             "transform -translate-x-1/2 -translate-y-1/2 text-white cursor-pointer"
                           }
                         >
-                          <div>{p[0]}</div>
+                          <div>{node.id}</div>
                           <InfoBox className="label-box" isNode={true}>
                             <div className="label-box-content" />
                           </InfoBox>
@@ -189,7 +129,7 @@ const BatchNodes2D = () => {
                       </Html>
                       <Html
                         distanceFactor={10}
-                        position={new Vector3().fromArray(p[1].position)}
+                        position={new Vector3().fromArray(node.position)}
                       >
                         <div
                           className={
@@ -200,8 +140,8 @@ const BatchNodes2D = () => {
                             <AgGridReact
                               rowData={[
                                 {
-                                  id: p[0],
-                                  group: p[1].group.name || p[1].group.id,
+                                  id: node.id,
+                                  group: node.group.name || node.group.id,
                                 },
                               ]}
                             >
@@ -222,8 +162,8 @@ const BatchNodes2D = () => {
         links
           .filter((edge: GraphLink) =>
             selectedGroupId
-              ? edge.source.group.id === selectedGroupId ||
-                edge.target.group.id === selectedGroupId
+              ? edge.source.group === selectedGroupId ||
+                edge.target.group === selectedGroupId
               : edge
           )
           .map((edge: GraphLink, i: number) => {
@@ -232,7 +172,7 @@ const BatchNodes2D = () => {
                 key={"edge-" + i}
                 coords={edge.source.position}
                 nextCoords={edge.target.position}
-                visibility={showEdges}
+                visibility={showLinks}
               />
             );
           })}

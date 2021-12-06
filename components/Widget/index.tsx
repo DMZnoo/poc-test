@@ -22,9 +22,10 @@ const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
     setCurrentFileName,
     setData,
     currentFileName,
-    setShowEdges,
-    showEdges,
+    setShowLinks,
+    showLinks,
     setLoading,
+    links,
   } = React.useContext<AppContextProps>(AppContext);
   const [fileNames, setFileNames] = React.useState<string[]>([]);
 
@@ -33,13 +34,13 @@ const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
     {}
   );
 
-  React.useEffect(() => {
-    if (data && Object.keys(data).includes("links")) {
-      let size = 0;
-      data["links"].forEach((linkArr) => (size += linkArr.length));
-      setLinkSize(size);
-    }
-  }, [data]);
+  // React.useEffect(() => {
+  //   if (data && Object.keys(data).includes("links")) {
+  //     let size = 0;
+  //     data["links"].forEach((linkArr) => (size += linkArr.length));
+  //     setLinkSize(size);
+  //   }
+  // }, [data]);
 
   React.useEffect(() => {
     Object.entries(cachedData).forEach((dat) => {
@@ -124,20 +125,20 @@ const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
                   appTheme === "dark" ? "text-white" : "text-black"
                 }`}
               >
-                {showEdges ? "Hide" : "Show"} Edges
+                {showLinks ? "Hide" : "Show"} Edges
               </Switch.Label>
               <Switch
-                checked={showEdges}
-                onChange={setShowEdges}
-                className={`${showEdges ? "bg-teal-900" : "bg-white-700"}
+                checked={showLinks}
+                onChange={setShowLinks}
+                className={`${showLinks ? "bg-teal-900" : "bg-white-700"}
           relative inline-flex flex-shrink-0 h-[38px] w-[74px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
               >
                 <span className="sr-only">
-                  {showEdges ? "Hide" : "Show"} Edges
+                  {showLinks ? "Hide" : "Show"} Edges
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`${showEdges ? "translate-x-9" : "translate-x-0"}
+                  className={`${showLinks ? "translate-x-9" : "translate-x-0"}
             pointer-events-none inline-block h-[34px] w-[34px] rounded-full bg-white shadow-lg transform ring-0 transition ease-in-out duration-200`}
                 />
               </Switch>
@@ -181,29 +182,34 @@ const Widget: React.FC<IWidget> = ({ dim, setDim }) => {
             <p>Total Node Count: {data["nodes"].length}</p>
           )}
           {data && Object.keys(data).includes("links") && (
-            <p>Total Link Count: {linkSize}</p>
+            <p>Total Link Count: {data["links"].length}</p>
           )}
           {data && Object.keys(data).includes("nodes") && (
             <p>
               Displayed Node Count:{" "}
-              {
-                data["nodes"].filter(
-                  (node) =>
-                    node.group.name === selectedGroupId ||
-                    (node.group.id === selectedGroupId && node)
-                ).length
-              }
+              {selectedGroupId
+                ? data["nodes"].filter(
+                    (node) =>
+                      node.group.id === selectedGroupId ||
+                      node.group === selectedGroupId
+                  ).length
+                : data["nodes"].length}
             </p>
           )}
-          {data && Object.keys(data).includes("links") && selectedGroupId && (
-            <p>
-              Displayed Links Count:{" "}
-              {Number.isInteger(Number(selectedGroupId)) &&
-              data["links"][Number(selectedGroupId)]
-                ? data["links"][Number(selectedGroupId)].length
+          <p>
+            Displayed Links Count:{" "}
+            <>
+              {showLinks
+                ? selectedGroupId
+                  ? links.filter(
+                      (link) =>
+                        link.source.group === selectedGroupId ||
+                        link.target.group === selectedGroupId
+                    ).length
+                  : links.length
                 : 0}
-            </p>
-          )}
+            </>
+          </p>
         </div>
         <div>
           <p>Groups: </p>

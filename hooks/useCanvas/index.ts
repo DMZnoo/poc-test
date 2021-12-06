@@ -1,9 +1,9 @@
 import * as React from "react";
-import { GraphDataType } from "../../global.d.types";
+import { GraphDataType, GraphLink } from "../../global.d.types";
 
 export type CanvasContextProps = {
-  showEdges: boolean;
-  setShowEdges: (val: boolean) => void;
+  showLinks: boolean;
+  setShowLinks: (val: boolean) => void;
   nodeCount: number;
   setNodeCount: (val: number) => void;
   layer: number;
@@ -24,10 +24,12 @@ export type CanvasContextProps = {
   setGroups: (val: Record<string, any>) => void;
   enableScroll: boolean;
   setEnableScroll: (val: boolean) => void;
+  links: GraphLink[];
+  setLinks: (val: GraphLink[]) => void;
 };
 
 const useCanvas = (): CanvasContextProps => {
-  const [showEdges, setShowEdges] = React.useState<boolean>(false);
+  const [showLinks, setShowLinks] = React.useState<boolean>(false);
   const [nodeCount, setNodeCount] = React.useState<number>(0);
   const [layer, setLayer] = React.useState<number>(0);
   const [showLabel, toggleLabel] = React.useState<boolean>(true);
@@ -40,10 +42,11 @@ const useCanvas = (): CanvasContextProps => {
   const [selectedGroupId, setSelectedGroupId] = React.useState<string>();
   const [groups, setGroups] = React.useState<Record<string, any>>({});
   const [enableScroll, setEnableScroll] = React.useState<boolean>(true);
+  const [links, setLinks] = React.useState<GraphLink[]>([]);
 
   return {
-    showEdges,
-    setShowEdges,
+    showLinks,
+    setShowLinks,
     nodeCount,
     setNodeCount,
     setLayer,
@@ -64,6 +67,8 @@ const useCanvas = (): CanvasContextProps => {
     setGroups,
     enableScroll,
     setEnableScroll,
+    links,
+    setLinks,
   };
 };
 

@@ -1,4 +1,4 @@
-import { GraphDataType } from "global.d.types";
+import { GraphDataType, GraphLink } from "global.d.types";
 import * as React from "react";
 
 export type AppContextProps = {
@@ -16,13 +16,15 @@ export type AppContextProps = {
   setEnableScroll: (val: boolean) => void;
   currentFileName: string | undefined;
   setCurrentFileName: (val: string) => void;
-  showEdges: boolean;
-  setShowEdges: (val: boolean) => void;
+  showLinks: boolean;
+  setShowLinks: (val: boolean) => void;
+  links: GraphLink[];
+  setLinks: (val: GraphLink[]) => void;
 };
 
 const useApp = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [showEdges, setShowEdges] = React.useState<boolean>(false);
+  const [showLinks, setShowLinks] = React.useState<boolean>(false);
   const [appTheme, setAppTheme] = React.useState<"dark" | "light">("dark");
   const [data, setData] = React.useState<GraphDataType | undefined>();
   const [dataGroups, setDataGroups] = React.useState<Record<string, any>>({});
@@ -33,6 +35,7 @@ const useApp = () => {
   const [currentFileName, setCurrentFileName] = React.useState<
     string | undefined
   >();
+  const [links, setLinks] = React.useState<GraphLink[]>([]);
 
   return {
     loading,
@@ -49,8 +52,10 @@ const useApp = () => {
     setEnableScroll,
     currentFileName,
     setCurrentFileName,
-    showEdges,
-    setShowEdges,
+    showLinks,
+    setShowLinks,
+    links,
+    setLinks,
   };
 };
 

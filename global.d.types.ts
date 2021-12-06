@@ -1,11 +1,8 @@
 export type Node = {
   id: string;
   position: number[];
-  group: {
-    id?: string;
-    name?: string;
-    positions: number[];
-  };
+  group: any;
+  color: string;
 };
 
 export type LinkType = {
@@ -18,20 +15,16 @@ export type GraphLink = {
   source: {
     id: string;
     position: number[];
-    group: {
-      id: string;
-    };
+    group: string;
   };
   target: {
     id: string;
     position: number[];
-    group: {
-      id: string;
-    };
+    group: string;
   };
 };
 
 export type GraphDataType = {
   nodes: ReadonlyArray<Node>;
-  links: ReadonlyArray<LinkType[]>;
+  links: ReadonlyArray<LinkType>;
 };
